@@ -36,9 +36,3 @@ class Post(db.Model):
 def load_user(id):
     return User.query.get(int(id))
 
-
-if __name__ == "__main__":
-    user = User(username='cyq', email='cyq@example.com')
-    user.set_pwd_hash(123)
-    db.session.add(user)
-    db.session.commit()
