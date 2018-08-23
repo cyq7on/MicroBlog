@@ -1,13 +1,22 @@
-from app import db
+from app import db, login
 from datetime import datetime
+from werkzeug.security import generate_password_hash, check_password_hash
+from flask_login import UserMixin
 
 
-class User(db.Model):
+class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(64), index=True, unique=True)
     email = db.Column(db.String(120), index=True, unique=True)
     pwd_hash = db.Column(db.String(128))
     posts = db.relationship('Post', backref='author', lazy='dynamic')
+
+    def set_pwd_hash(self, pwd):
+        self.pwd_hash = generate_password_hash(pwd)
+
+    def check_pwd(self, pwd):
+        print(pwd)
+        return check_password_hash(self.pwd_hash, pwd)
 
     def __repr__(self):
         return '<User {}>'.format(self.username)
@@ -21,3 +30,15 @@ class Post(db.Model):
 
     def __repr__(self):
         return '<Post {}>'.format(self.body)
+
+
+@login.user_loader
+def load_user(id):
+    return User.query.get(int(id))
+
+
+if __name__ == "__main__":
+    user = User(username='cyq', email='cyq@example.com')
+    user.set_pwd_hash(123)
+    db.session.add(user)
+    db.session.commit()
